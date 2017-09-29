@@ -2,6 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
+from datetime import datetime, timedelta
 import logging
 from logging.handlers import RotatingFileHandler
 import os
@@ -135,6 +136,22 @@ def add_no_cache_header(res):
     # res.headers["Pragma"] = "no-cache"
     # res.headers["Expires"] = "0"
     # res.headers['Cache-Control'] = 'public, max-age=0'
+    return res
+
+
+@app.after_request
+def static_cache(res):
+    """Set response headers about caching for static resources
+
+    A year later is set in this example as advised here:
+    https://developers.google.com/speed/docs/insights/LeverageBrowserCaching
+
+    It may be better to store the expiration date somewhere else and reuse it
+    since this example calculate the date in every request.
+    """
+    if request.endpoint == 'static':
+        expires = datetime.now() + timedelta(days=365)
+        res.headers['Expires'] = expires.isoformat()
     return res
 
 
